@@ -117,7 +117,7 @@ plt.show()
 # visualize in 3D plot #?
 view_data = train_data.train_data[:200].view(-1, 28*28).type(torch.FloatTensor)/255.
 encoded_data, _ = autoencoder(view_data)
-fig = plt.figure(2); ax = Axes3D(fig)
+fig = plt.figure(2); ax = Axes3D(fig)   #3D图
 X, Y, Z = encoded_data.data[:, 0].numpy(), encoded_data.data[:, 1].numpy(), encoded_data.data[:, 2].numpy()
 values = train_data.train_labels[:200].numpy()
 for x, y, z, s in zip(X, Y, Z, values):

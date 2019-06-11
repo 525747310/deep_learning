@@ -27,9 +27,9 @@ DOWNLOAD_MNIST = False
 # Mnist digits dataset
 if not(os.path.exists('./mnist/')) or not os.listdir('./mnist/'):    #os.listdir() 方法用于返回指定的文件夹包含的文件或文件夹的名字的列表。这个列表以字母顺序。 它不包括 '.' 和'..' 即使它在文件夹中。
     # not mnist dir or mnist is empyt dir
-    DOWNLOAD_MNIST = False
+    DOWNLOAD_MNIST = True
 
-train_data = torchvision.datasets.MNIST(    #去mnist网站下载数据集
+train_data = torchvision.datasets.MNIST(            #去mnist网站下载数据集
     root='./mnist/',                                #保存数据的地址
     train=True,                                     # this is training data   #fulse为测试集
     transform=torchvision.transforms.ToTensor(),    # Converts a PIL.Image or numpy.ndarray to   #把网上下载的数据改变成tensor格式并且把值压缩到0-1
@@ -45,11 +45,12 @@ plt.title('%i' % train_data.train_labels[0])
 plt.show()
 
 # Data Loader for easy mini-batch return in training, the image batch shape will be (50, 1, 28, 28)
-train_loader = Data.DataLoader(dataset=train_data, batch_size=BATCH_SIZE, shuffle=True)     #会把数据压缩到0-1之间
+train_loader = Data.DataLoader(dataset=train_data, batch_size=BATCH_SIZE, shuffle=True)
 
 # pick 2000 samples to speed up testing
 test_data = torchvision.datasets.MNIST(root='./mnist/', train=False)
-test_x = torch.unsqueeze(test_data.test_data, dim=1).type(torch.FloatTensor)[:2000]/255.   # shape from (2000, 28, 28) to (2000, 1, 28, 28), value in range(0,1)
+# shape from (2000, 28, 28) to (2000, 1, 28, 28), value in range(0,1)
+test_x = torch.unsqueeze(test_data.test_data, dim=1).type(torch.FloatTensor)[:2000]/255.
 test_y = test_data.test_labels[:2000]
 
 
@@ -57,7 +58,7 @@ class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
         self.conv1 = nn.Sequential(         # input shape (1, 28, 28)
-            nn.Conv2d(    #卷积层
+            nn.Conv2d(                      #卷积层
                 in_channels=1,              # input height
                 out_channels=16,            # n_filters
                 kernel_size=5,              # filter size
@@ -76,7 +77,7 @@ class CNN(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
-        x = self.conv2(x)     #（batch，32,7,7）
+        x = self.conv2(x)                   #（batch，32,7,7）
         x = x.view(x.size(0), -1)           # flatten the output of conv2 to (batch_size, 32 * 7 * 7)  #view（）把数据进行维度的变形
         output = self.out(x)
         return output, x    # return x for visualization
@@ -89,14 +90,17 @@ optimizer = torch.optim.Adam(cnn.parameters(), lr=LR)   # optimize all cnn param
 loss_func = nn.CrossEntropyLoss()                       # the target label is not one-hotted
 
 # following function (plot_with_labels) is for visualization, can be ignored if not interested
-from matplotlib import cm
-try: from sklearn.manifold import TSNE; HAS_SK = True
+from matplotlib import cm                                #里面有很多颜色映射表
+
+#TSNE提供了一种有效的降维方式，让我们对高于2维数据的聚类结果以二维的方式展示出来
+try: from sklearn.manifold import TSNE; HAS_SK = True    #TSNE即t-distributed Stochastic Neighbor Embedding
 except: HAS_SK = False; print('Please install sklearn for layer visualization')
 def plot_with_labels(lowDWeights, labels):
-    plt.cla()
+    plt.cla()   #清除轴，当前活动轴在当前图中。 它保持其他轴不变
     X, Y = lowDWeights[:, 0], lowDWeights[:, 1]
     for x, y, s in zip(X, Y, labels):
-        c = cm.rainbow(int(255 * s / 9)); plt.text(x, y, s, backgroundcolor=c, fontsize=9)
+        c = cm.rainbow(int(255 * s / 9))    #设置颜色
+        plt.text(x, y, s, backgroundcolor=c, fontsize=9)   #文字说明
     plt.xlim(X.min(), X.max()); plt.ylim(Y.min(), Y.max()); plt.title('Visualize last layer'); plt.show(); plt.pause(0.01)
 
 plt.ion()
@@ -117,9 +121,9 @@ for epoch in range(EPOCH):
             print('Epoch: ', epoch, '| train loss: %.4f' % loss.data.numpy(), '| test accuracy: %.2f' % accuracy)
             if HAS_SK:
                 # Visualization of trained flatten layer (T-SNE)
-                tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000)
-                plot_only = 500
-                low_dim_embs = tsne.fit_transform(last_layer.data.numpy()[:plot_only, :])
+                tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000)   #n_components=2嵌入空间的维度；n_iter=5000优化的最大迭代次数
+                plot_only = 500   #只画前500个点
+                low_dim_embs = tsne.fit_transform(last_layer.data.numpy()[:plot_only, :]) #数据经过tsne以后是二维的
                 labels = test_y.numpy()[:plot_only]
                 plot_with_labels(low_dim_embs, labels)
 plt.ioff()

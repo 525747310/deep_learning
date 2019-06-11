@@ -43,7 +43,7 @@ class RNN(nn.Module):
         # x (batch, time_step, input_size)
         # h_state (n_layers, batch, hidden_size)
         # r_out (batch, time_step, hidden_size)
-        r_out, h_state = self.rnn(x, h_state)
+        r_out, h_state = self.rnn(x, h_state)   #h_state是对之前整个sin-cos曲线的记忆
 
         outs = []  # save all predictions
         for time_step in range(r_out.size(1)):  # calculate output for each time step
@@ -80,6 +80,8 @@ for step in range(100):
                         endpoint=False)  # float32 for converting torch FloatTensor   #endpoint为False则不包含end
     x_np = np.sin(steps)
     y_np = np.cos(steps)
+    print(y_np.shape)
+    print(y_np.ndim)
 
     x = torch.from_numpy(x_np[np.newaxis, :, np.newaxis])  # shape (batch, time_step, input_size)   #np.newaxis的作用就是在这一位置增加一个一维
     y = torch.from_numpy(y_np[np.newaxis, :, np.newaxis])

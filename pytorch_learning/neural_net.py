@@ -97,6 +97,7 @@ for t in range(200):
     prediction = net(x)     # input x and predict based on x
 
     loss = loss_func(prediction, y)     # must be (1. nn output, 2. target)
+    print(y.dim())
 
     optimizer.zero_grad()   # clear gradients for next train
     loss.backward()         # backpropagation, compute gradients

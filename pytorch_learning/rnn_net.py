@@ -56,7 +56,8 @@ class RNN(nn.Module):
             input_size=INPUT_SIZE,
             hidden_size=64,         # rnn hidden unit
             num_layers=1,           # number of rnn layer
-            batch_first=True,       # input & output will has batch size as 1s dimension. e.g. (batch, time_step, input_size)   #batch是否放在第一个维度
+            # batch是否放在第一个维度
+            batch_first=True,       # input & output will has batch size as 1s dimension. e.g. (batch, time_step, input_size)
         )
 
         self.out = nn.Linear(64, 10)    #全连接层
